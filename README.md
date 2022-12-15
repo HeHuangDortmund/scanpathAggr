@@ -40,6 +40,3 @@ scanpathVisualisation(scanpath_MIT1003_i1182314083, reprensentScanpath, stimulus
 
 <img src="man/figures/README-example-1.png" width="100%" />
 
-``` r
-## basic example code
-```
