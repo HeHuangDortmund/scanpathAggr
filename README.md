@@ -25,6 +25,12 @@ You can install the package using Github, with the remotes package:
 remotes::install_github("HeHuangDortmund/scanpathAggr")
 ```
 
+For windows system, if you get error massage like "...DLL 'xxx' not found: maybe not installed for this architecture", you should add the "--no-multiarch" in order to avoid installing the packages in multiple arch as follows:
+ 
+``` r
+remotes::install_github("HeHuangDortmund/scanpathAggr", INSTALL_opts = c("--no-multiarch"))
+```
+
 ## Example
 
 This is a basic example which shows how to find a representative scanpath in a sample:
