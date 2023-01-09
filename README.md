@@ -17,6 +17,11 @@ You can install the released version of scanpathAggr from [CRAN](https://CRAN.R-
 ``` r
 install.packages("scanpathAggr")
 ```
+For windows system, if you get error massage like "...DLL 'xxx' not found: maybe not installed for this architecture", you should add the "--no-multiarch" in order to avoid installing the packages in multiple arch as follows:
+ 
+``` r
+remotes::install_github("HeHuangDortmund/scanpathAggr", INSTALL_opts = c("--no-multiarch"))
+```
  -->
 
 You can install the package using Github, with the remotes package:
