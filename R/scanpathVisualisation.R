@@ -149,8 +149,8 @@ scanpathVisualisation = function(scanPath=NULL,
                                              y = Fixation_Position_Y_px,
                                              size = Duration),col = 'red') +
           geom_label(data = scanPath_rep,aes(label = Order,
-                                            x = Fixation_Position_X_px + 30,
-                                            y = Fixation_Position_Y_px + 30), col = 'red', size = 2.5) +
+                                            x = Fixation_Position_X_px + 15,
+                                            y = Fixation_Position_Y_px + 15), col = 'red', size = 2.5) +
           ylim(0, height(img)) +
           xlim(0, width(img))
 
@@ -165,8 +165,8 @@ scanpathVisualisation = function(scanPath=NULL,
                                              y = Fixation_Position_Y_px,
                                              size = Duration),col = 'red') +
           geom_label(data = scanPath_rep,aes(label = Order,
-                                            x = Fixation_Position_X_px + 30,
-                                            y = Fixation_Position_Y_px + 30), col = 'red', size = 2.5) +
+                                            x = Fixation_Position_X_px + 15,
+                                            y = Fixation_Position_Y_px + 15), col = 'red', size = 2.5) +
           ylim(0, height(img)) +
           xlim(0, width(img))
       }
@@ -220,8 +220,8 @@ scanpathVisualisation = function(scanPath=NULL,
                                              y = Fixation_Position_Y_px,
                                              size = Duration),col = 'red') +
           geom_label(data = scanPath_rep,aes(label = Order,
-                                            x = Fixation_Position_X_px + 30,
-                                            y = Fixation_Position_Y_px + 30), col = 'red', size = 2.5) +
+                                            x = Fixation_Position_X_px + 15,
+                                            y = Fixation_Position_Y_px + 15), col = 'red', size = 2.5) +
           ylim(0, height(img)) +
           xlim(0, width(img))
 
@@ -243,8 +243,8 @@ scanpathVisualisation = function(scanPath=NULL,
                                              y = Fixation_Position_Y_px,
                                              size = Duration),col = 'red') +
           geom_label(data = scanPath_rep,aes(label = Order,
-                                            x = Fixation_Position_X_px + 20,
-                                            y = Fixation_Position_Y_px + 20), col = 'red', size = 2.5) +
+                                            x = Fixation_Position_X_px + 15,
+                                            y = Fixation_Position_Y_px + 15), col = 'red', size = 2.5) +
           ylim(0, height(img)) +
           xlim(0, width(img))+
           theme(legend.position = "none")
@@ -273,8 +273,8 @@ scanpathVisualisation = function(scanPath=NULL,
                                            y = Fixation_Position_Y_px,
                                            size = Duration),col = 'red') +
         geom_label(data = scanPath_rep,aes(label = Order,
-                                          x = Fixation_Position_X_px + 30,
-                                          y = Fixation_Position_Y_px + 30), col = 'red', size = 2.5) +
+                                          x = Fixation_Position_X_px + 15,
+                                          y = Fixation_Position_Y_px + 15), col = 'red', size = 2.5) +
         ylim(0, height(img)) +
         xlim(0, width(img))+
         theme(legend.position = "none")
