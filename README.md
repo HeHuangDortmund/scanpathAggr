@@ -27,7 +27,7 @@ remotes::install_github("HeHuangDortmund/scanpathAggr")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+This is a basic example which shows how to find a representative scanpath in a sample:
 
 ``` r
 library(scanpathAggr)
@@ -40,6 +40,3 @@ scanpathVisualisation(scanpath_MIT1003_i1182314083, reprensentScanpath, stimulus
 
 <img src="man/figures/README-example-1.png" width="100%" />
 
-``` r
-## basic example code
-```
