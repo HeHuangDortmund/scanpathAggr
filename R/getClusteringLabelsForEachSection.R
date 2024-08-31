@@ -23,7 +23,7 @@ getClusteringLabelsForEachSection = function(convex_hull,OR_p, compareFirstAndRe
   #library(rgeos)
   gpcPoly = list()
   for (i in 1:length(convex_hull)) {
-    if(is.na(convex_hull[[i]])){
+    if(any(is.na(convex_hull[[i]]))){
       gpcPoly[[i]] = NA
     } else{
       n_ch = length(convex_hull[[i]])
