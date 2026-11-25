@@ -8,7 +8,8 @@
 
 
 #' @export
-#' @import sp rgeos concaveman stats
+#' @import sp methods
+#' @importFrom stats dist
 
 
 representativeScanpathSimplify = function(RepresentScanpath, alpha){
@@ -17,9 +18,9 @@ representativeScanpathSimplify = function(RepresentScanpath, alpha){
 
 
 
-  n = dim(cords)[1] - 1
+  n = max(0L, nrow(cords) - 1L)
   saccadlength = c()
-  for (i in 1:n) {
+  for (i in seq_len(n)) {
     saccadlength[i] = dist(cords[c(i,i+1),])
   }
 
@@ -30,9 +31,9 @@ representativeScanpathSimplify = function(RepresentScanpath, alpha){
     RepresentScanpath = merge1st(RepresentScanpath, alpha)
 
     cords = RepresentScanpath$representScanpath[,c("Fixation_Position_X_px","Fixation_Position_Y_px")]
-    n = dim(cords)[1] - 1
+    n = max(0L, nrow(cords) - 1L)
     saccadlength = c()
-    for (i in 1:n) {
+    for (i in seq_len(n)) {
       saccadlength[i] = dist(cords[c(i,i+1),])
     }
 
@@ -77,9 +78,9 @@ merge1st = function(RepresentScanpath, alpha){
 
   cords = RepresentScanpath$representScanpath[,c("Fixation_Position_X_px","Fixation_Position_Y_px")]
 
-  n = dim(cords)[1] - 1
+  n = max(0L, nrow(cords) - 1L)
   saccadlength = c()
-  for (i in 1:n) {
+  for (i in seq_len(n)) {
     saccadlength[i] = dist(cords[c(i,i+1),])
   }
 

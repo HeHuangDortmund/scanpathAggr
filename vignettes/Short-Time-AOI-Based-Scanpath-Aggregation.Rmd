@@ -52,7 +52,7 @@ reprensentScanpath = scanpathAggr(scanpath_MIT1003_i1182314083, 3, theta = 0.2)
 ## Data containing 4 columns (without start and end time of the fixations):
 ```{r}
 data(scanpath_OSIE_1001)
-reprensentScanpath = scanpathAggr(scanpath_MIT1003_i1182314083, 3, theta = 0.2)
+reprensentScanpath = scanpathAggr(scanpath_OSIE_1001, 3, theta = 0.2)
 ```
 
 
@@ -61,7 +61,7 @@ reprensentScanpath = scanpathAggr(scanpath_MIT1003_i1182314083, 3, theta = 0.2)
 
 
 Show the reprensentative scanpath 
-```{r, out.width = "700px", , out.height="400px"}
+```{r, out.width = "700px", out.height="400px"}
 reprensentScanpath = scanpathAggr(scanpath_MIT1003_i1182314083, 3, theta = 0.2)
 stimuluspath = system.file('stimulus/i1182314083.jpeg', package = "scanpathAggr")
 scanpathVisualisation(scanpath_MIT1003_i1182314083, reprensentScanpath, stimuluspath)
@@ -70,7 +70,7 @@ scanpathVisualisation(scanpath_MIT1003_i1182314083, reprensentScanpath, stimulus
 
 
 Increase $\theta$ to simplify the reprensentative scanpath
-```{r, out.width = "700px", , out.height="400px"}
+```{r, out.width = "700px", out.height="400px"}
 data(scanpath_MIT1003_i1182314083)
 reprensentScanpath = scanpathAggr(scanpath_MIT1003_i1182314083, 3, theta = 0.6)
 scanpathVisualisation(scanpath_MIT1003_i1182314083, reprensentScanpath, stimuluspath)
@@ -78,7 +78,7 @@ scanpathVisualisation(scanpath_MIT1003_i1182314083, reprensentScanpath, stimulus
 
 
 Simplify the reprensentative scanpath post hoc 
-```{r, out.width = "700px", , out.height="400px"}
+```{r, out.width = "700px", out.height="400px"}
 data(scanpath_MIT1003_i1182314083)
 reprensentScanpath = scanpathAggr(scanpath_MIT1003_i1182314083, 3, theta = 0.2, simplify = TRUE)
 scanpathVisualisation(scanpath_MIT1003_i1182314083, reprensentScanpath, stimuluspath)

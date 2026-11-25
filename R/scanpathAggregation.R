@@ -24,7 +24,6 @@
 
 
 #' @export
-#' @import dbscan concaveman data.table geometry rgeos prevR sp
 #' @examples
 #' data(scanpath_MIT1003_i1182314083)
 #' scanpathAggr(scanpath_MIT1003_i1182314083, 3)
@@ -34,7 +33,6 @@
 scanpathAggr = function(scanpaths, ExperimentDuration, et = 0.04, theta = 0.2,
                         simplify = FALSE, alpha = 50){
 
-  options(warn=-1)
 
 
   if(is.null(scanpaths$Event_Start_Trial_Time_ms)){
@@ -52,7 +50,7 @@ scanpathAggr = function(scanpaths, ExperimentDuration, et = 0.04, theta = 0.2,
       P_j = scanpaths[scanpaths$Participant == Participants[j],]
       n_fix = dim(P_j)[1]
       saccad_dur = (ExperimentDuration  - sum(P_j$Duration))/n_fix
-      Event_Start_Trial_Time_ms = c(0,cumsum(P_j$Duration)[1:(n_fix-1)]) + (0:(n_fix-1))*saccad_dur
+      Event_Start_Trial_Time_ms = c(0,utils::head(cumsum(P_j$Duration), -1L)) + (0:(n_fix-1))*saccad_dur
       Event_Ende_Trial_Time_ms = Event_Start_Trial_Time_ms + P_j$Duration
 
       FIXIATIONS[[j]] = data.frame(Participant = Participants[j],

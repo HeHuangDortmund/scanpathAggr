@@ -13,8 +13,8 @@
 #'      \item{Duration}{duration in seconds}
 #'  }
 #'
-#'  @source {data set MIT1003 from Judd et al. (2009)  <Judd, T., Ehinger, K., Durand, F., & Torralba, A. (2009).
-#'   Learning to predict where humans look. 2106–2113.> }
-#'  @examples
-#'  data(scanpath_MIT1003_i1182314083)
+#' @source Judd, T., Ehinger, K., Durand, F., & Torralba, A. (2009).
+#'   Learning to predict where humans look. 2106-2113.
+#' @examples
+#' data(scanpath_MIT1003_i1182314083)
 "scanpath_MIT1003_i1182314083"

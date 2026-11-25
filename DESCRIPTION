@@ -1,10 +1,10 @@
 Package: scanpathAggr
 Type: Package
 Title: Scanpath Aggregation
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: person("He", "Huang", email = "huang.he2014@hotmail.com",
                   role = c("aut", "cre"))
-Imports: dbscan, concaveman, data.table, geometry, rgeos, prevR, sp, ggplot2, methods, grDevices, imager
+Imports: dbscan, concaveman, data.table, sf, sp, ggplot2 (>= 3.4.0), methods, grDevices, imager, stats, utils
 Description: Aggregate a group of scanpaths by finding a representative scanpath based 
     on short time AOIs.
 License: GPL-2

@@ -115,8 +115,8 @@ scanpathVisualisation = function(scanPath=NULL,
 
     img = load.image(stimulusImgPath)
     scanPath_rep = representScanpath$representScanpath
-    scanPath_rep$Order = 1:(dim(scanPath_rep)[1])
-    if(!is.null(representScanpath$AOIpolygons)){
+    scanPath_rep$Order = seq_len(nrow(scanPath_rep))
+    if(drawAOIs && length(representScanpath$AOIpolygons)){
       AOIs_coords = list()
       for(i in 1:length(representScanpath$AOIpolygons)){
         AOIs_coords[[i]] = representScanpath$AOIpolygons[[i]]@polygons[[1]]@Polygons[[1]]@coords
@@ -137,39 +137,35 @@ scanpathVisualisation = function(scanPath=NULL,
       names(AOIcoord) = c('x', 'y', 'AOIs')
       AOIcoord$x = as.numeric(AOIcoord$x)
       AOIcoord$y = as.numeric(AOIcoord$y)
-      scanPath_rep$Participant = 'represent'
+      scanPath_rep$Participant = rep('represent', nrow(scanPath_rep))
 
-      if(drawAOIs){
-        p <- ggplot()+
-          background_image(img) +
-          geom_polygon(data = AOIcoord, aes(x = x, y = y, fill = AOIs),alpha = 0.7, color = NA)+
-          geom_path(data = scanPath_rep, aes(x = Fixation_Position_X_px,
-                                             y = Fixation_Position_Y_px), col = 'red', size = 2)+
-          geom_point(data = scanPath_rep,aes(x = Fixation_Position_X_px,
-                                             y = Fixation_Position_Y_px,
-                                             size = Duration),col = 'red') +
-          geom_label(data = scanPath_rep,aes(label = Order,
-                                            x = Fixation_Position_X_px + 15,
-                                            y = Fixation_Position_Y_px + 15), col = 'red', size = 2.5) +
-          ylim(0, height(img)) +
-          xlim(0, width(img))
+      p <- ggplot()+
+        background_image(img) +
+        geom_polygon(data = AOIcoord, aes(x = x, y = y, fill = AOIs),alpha = 0.7, color = NA)+
+        geom_path(data = scanPath_rep, aes(x = Fixation_Position_X_px,
+                                           y = Fixation_Position_Y_px), col = 'red', linewidth = 2)+
+        geom_point(data = scanPath_rep,aes(x = Fixation_Position_X_px,
+                                           y = Fixation_Position_Y_px,
+                                           size = Duration),col = 'red') +
+        geom_label(data = scanPath_rep,aes(label = Order,
+                                          x = Fixation_Position_X_px + 15,
+                                          y = Fixation_Position_Y_px + 15), col = 'red', size = 2.5) +
+        ylim(0, height(img)) +
+        xlim(0, width(img))
 
-        #theme(legend.position = "none")
-      }else{ # if no AOIs in represent scanpath, than do not draw AOI polygons
-        p <- ggplot()+
-          background_image(img) +
-          #geom_polygon(data = AOIcoord, aes(x = x, y = y, fill = AOIs),alpha = 0.7, color = NA)+
-          geom_path(data = scanPath_rep, aes(x = Fixation_Position_X_px,
-                                             y = Fixation_Position_Y_px), col = 'red', size = 2)+
-          geom_point(data = scanPath_rep,aes(x = Fixation_Position_X_px,
-                                             y = Fixation_Position_Y_px,
-                                             size = Duration),col = 'red') +
-          geom_label(data = scanPath_rep,aes(label = Order,
-                                            x = Fixation_Position_X_px + 15,
-                                            y = Fixation_Position_Y_px + 15), col = 'red', size = 2.5) +
-          ylim(0, height(img)) +
-          xlim(0, width(img))
-      }
+    }else{
+      p <- ggplot()+
+        background_image(img) +
+        geom_path(data = scanPath_rep, aes(x = Fixation_Position_X_px,
+                                           y = Fixation_Position_Y_px), col = 'red', linewidth = 2)+
+        geom_point(data = scanPath_rep,aes(x = Fixation_Position_X_px,
+                                           y = Fixation_Position_Y_px,
+                                           size = Duration),col = 'red') +
+        geom_label(data = scanPath_rep,aes(label = Order,
+                                          x = Fixation_Position_X_px + 15,
+                                          y = Fixation_Position_Y_px + 15), col = 'red', size = 2.5) +
+        ylim(0, height(img)) +
+        xlim(0, width(img))
     }
 
   } else{ # scanpaths representative scanpath together
@@ -178,9 +174,9 @@ scanpathVisualisation = function(scanPath=NULL,
     #order = do.call(c,sapply(scanPath[,.N, by = Participant]$N, function(n) 1:n))
     #scanPath$Order = order
     scanPath_rep = representScanpath$representScanpath
-    scanPath_rep$Order = 1:(dim(scanPath_rep)[1])
+    scanPath_rep$Order = seq_len(nrow(scanPath_rep))
 
-    if(!is.null(representScanpath$AOIpolygons)){
+    if(length(representScanpath$AOIpolygons)){
       AOIs_coords = list()
       for(i in 1:length(representScanpath$AOIpolygons)){
         AOIs_coords[[i]] = representScanpath$AOIpolygons[[i]]@polygons[[1]]@Polygons[[1]]@coords
@@ -200,7 +196,7 @@ scanpathVisualisation = function(scanPath=NULL,
       names(AOIcoord) = c('x', 'y', 'AOIs')
       AOIcoord$x = as.numeric(AOIcoord$x)
       AOIcoord$y = as.numeric(AOIcoord$y)
-      scanPath_rep$Participant = 'represent'
+      scanPath_rep$Participant = rep('represent', nrow(scanPath_rep))
       img = load.image(stimulusImgPath)
 
       if(drawAOIs){
@@ -215,7 +211,7 @@ scanpathVisualisation = function(scanPath=NULL,
                                        col = Participant), show.legend=FALSE) +
           geom_polygon(data = AOIcoord, aes(x = x, y = y, fill = AOIs),alpha = 0.7, color = NA)+
           geom_path(data = scanPath_rep, aes(x = Fixation_Position_X_px,
-                                             y = Fixation_Position_Y_px), col = 'red', size = 2)+
+                                             y = Fixation_Position_Y_px), col = 'red', linewidth = 2)+
           geom_point(data = scanPath_rep,aes(x = Fixation_Position_X_px,
                                              y = Fixation_Position_Y_px,
                                              size = Duration),col = 'red') +
@@ -238,7 +234,7 @@ scanpathVisualisation = function(scanPath=NULL,
                                        col = Participant)) +
           #geom_polygon(data = AOIcoord, aes(x = x, y = y, fill = AOIs, alpha = 0.7), color = NA)+
           geom_path(data = scanPath_rep, aes(x = Fixation_Position_X_px,
-                                             y = Fixation_Position_Y_px), col = 'red', size = 2)+
+                                             y = Fixation_Position_Y_px), col = 'red', linewidth = 2)+
           geom_point(data = scanPath_rep,aes(x = Fixation_Position_X_px,
                                              y = Fixation_Position_Y_px,
                                              size = Duration),col = 'red') +
@@ -255,7 +251,7 @@ scanpathVisualisation = function(scanPath=NULL,
 
 
     }else{
-      scanPath_rep$Participant = 'represent'
+      scanPath_rep$Participant = rep('represent', nrow(scanPath_rep))
       img = load.image(stimulusImgPath)
       p <- ggplot()+
         background_image(img) +
@@ -268,7 +264,7 @@ scanpathVisualisation = function(scanPath=NULL,
                                      col = Participant)) +
         #geom_polygon(data = AOIcoord, aes(x = x, y = y, fill = AOIs, alpha = 0.7), color = NA)+
         geom_path(data = scanPath_rep, aes(x = Fixation_Position_X_px,
-                                           y = Fixation_Position_Y_px), col = 'red', size = 2)+
+                                           y = Fixation_Position_Y_px), col = 'red', linewidth = 2)+
         geom_point(data = scanPath_rep,aes(x = Fixation_Position_X_px,
                                            y = Fixation_Position_Y_px,
                                            size = Duration),col = 'red') +

@@ -31,7 +31,8 @@ getRepresentScanpath(
 (6) Duration
 Only needed by durationrec = TRUE, otherwise use the default value NULL.}
 
-\item{unionAOI}{logical with default TRUE, using the Union (TRUE) of intersection(FALSE) of the polygons as the shape of the short time AOIs}
+\item{unionAOI}{logical. Use the union (TRUE) or intersection (FALSE) of the polygons
+for each short-time AOI. Intersections without polygonal area are omitted.}
 
 \item{durationrec}{logical, if to recalculate the duration of the fixation in representative scanpath using the
 average duration of the fixations in the short time AOI}

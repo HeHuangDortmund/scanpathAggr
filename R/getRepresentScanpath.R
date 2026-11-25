@@ -15,7 +15,8 @@
 #' Only needed by durationrec = TRUE, otherwise use the default value NULL.
 
 #'
-#' @param unionAOI logical with default TRUE, using the Union (TRUE) of intersection(FALSE) of the polygons as the shape of the short time AOIs
+#' @param unionAOI logical. Use the union (TRUE) or intersection (FALSE) of the polygons
+#' for each short-time AOI. Intersections without polygonal area are omitted.
 #' @param durationrec logical, if to recalculate the duration of the fixation in representative scanpath using the
 #' average duration of the fixations in the short time AOI
 #' @return A list of two elements:
@@ -24,7 +25,6 @@
 
 
 #' @export
-#' @import prevR sp
 #' @examples
 #' data(scanpath_MIT1003_i1182314083)
 #' concave_hull = getConcaveHulls(scanpath_MIT1003_i1182314083, 3, 0.04)
@@ -40,180 +40,60 @@ getRepresentScanpath = function(concave_hull, clusterings, et,
                                 unionAOI = TRUE,
                                 durationrec =FALSE){
 
-  #library(prevR)
-  #library(sp)
-
-  options(warn=-1)
-
-  coordsToSpatialPolygons = function(x){
-    if(is.na(x)){
-      sps = NA
-    }else{
-      p = Polygon(x[[1]])
-      ps = Polygons(list(p),1)
-      sps = SpatialPolygons(list(ps))
-    }
-    return(sps)
+  if (durationrec && is.null(Fixation_singleStimulus)) {
+    stop("Fixation_singleStimulus is required when durationrec is TRUE")
   }
-  SpatialPolygonsofHulls = lapply(concave_hull, coordsToSpatialPolygons)
-  #table(clusterings)
-  #labels = names(table(clusterings))[-1] # remove cluster 0
-  labels = names(table(clusterings))[names(table(clusterings))!=0]
-
-  if(unionAOI == FALSE){
-    intersectPolygon_list = list()
-    for (i in seq(along = labels)) {
-      ind = which(clusterings == labels[i])
-      #get intersections of the convex hulls with index 'ind'
-      if(length(ind) == 1){
-        intersectPolygon = SpatialPolygonsofHulls[[ind]]
-      } else{
-        intersectPolygon = SpatialPolygonsofHulls[[ind[1]]]
-        for (j in ind[-1]) {
-          intersectPolygon = gIntersection(intersectPolygon,
-                                           SpatialPolygonsofHulls[[j]])
-
-          #if(class(intersectPolygon) == "SpatialCollections"){
-          if(is(overlapPolygon, "SpatialCollections")){
-            # some times the results is not a SpatialPolygons
-            #  e.g. collection of polygons and lines
-            intersectPolygon = intersectPolygon@polyobj
-          }
-
-        }
-
-
-      }
-      intersectPolygon_list = c(intersectPolygon_list, intersectPolygon)
-    }
-  }else{
-    overlapPolygon_list = list()
-    for (i in seq(along = labels)) {
-      ind = which(clusterings == labels[i])
-      #get intersections of the convex hulls with index 'ind'
-      if(length(ind) == 1){
-        overlapPolygon = SpatialPolygonsofHulls[[ind]]
-      } else{
-        overlapPolygon = SpatialPolygonsofHulls[[ind[1]]]
-        for (j in ind[-1]) {
-          overlapPolygon = gUnion(overlapPolygon,
-                                  SpatialPolygonsofHulls[[j]])
-
-          #if(class(overlapPolygon) == "SpatialCollections"){
-          if(is(overlapPolygon, "SpatialCollections")){
-            # some times the results is not a SpatialPolygons
-            #  e.g. collection of polygons and lines
-            overlapPolygon = overlapPolygon@polyobj
-          }
-
-        }
-
-
-      }
-      overlapPolygon_list = c(overlapPolygon_list, overlapPolygon)
-
-    }
+  if (durationrec) {
+    points <- sf::st_as_sf(Fixation_singleStimulus,
+      coords = c("Fixation_Position_X_px", "Fixation_Position_Y_px"),
+      na.fail = FALSE
+    )
   }
+  geometries <- lapply(concave_hull, sectionGeometry)
+  labels <- names(table(clusterings))
+  labels <- labels[labels != "0"]
+  combine <- if (unionAOI) sf::st_union else sf::st_intersection
 
+  fixations <- data.frame(
+    Fixation_Position_X_px = numeric(),
+    Fixation_Position_Y_px = numeric(),
+    Event_Start_Trial_Time_ms = numeric(),
+    Event_Ende_Trial_Time_ms = numeric(),
+    Duration = numeric()
+  )
+  polygons <- list()
+  for (label in labels) {
+    sections <- which(clusterings == label)
+    duration <- length(sections) * et
+    if (duration < 0.1) next
 
-  #clusterCentroid = intersectPolygon_list[[1]]@polygons[[1]]@Polygons[[1]]@labpt
-  #clusterDuration = table(clusterings)[-1]*et
-  clusterDuration = table(clusterings)[names(table(clusterings))!=0]*et
-  #length(intersectPolygon_list)
+    parts <- Filter(Negate(is.null), geometries[sections])
+    if (!length(parts)) next
+    aoi <- Reduce(combine, parts)
+    aoi <- aoi[!sf::st_is_empty(aoi)]
+    if (!length(aoi)) next
 
-  tmpFun = function(x){
+    # A boundary-only intersection has no polygonal AOI to report.
+    if (any(sf::st_geometry_type(aoi) == "GEOMETRYCOLLECTION")) {
+      aoi <- sf::st_collection_extract(aoi, "POLYGON", warn = FALSE)
+    }
+    aoi <- aoi[sf::st_geometry_type(aoi) %in% c("POLYGON", "MULTIPOLYGON")]
+    if (!length(aoi)) next
 
-    #if(class(x) == "SpatialPoints"){
-    if(is(x, "SpatialPoints")){
-
-      if(!is.null(dim(x@coords))){
-        return(colMeans(x@coords))
-      }else{
-        return(x@coords)
-      }
-
-
-    #}else if(class(x) == "SpatialLines"){
-    }else if(is(x,"SpatialLines")){
-      return(colMeans(x@lines[[1]]@Lines[[1]]@coords))
-    }else{
-      return(x@polygons[[1]]@Polygons[[1]]@labpt)
+    polygon <- methods::as(aoi, "Spatial")
+    center <- polygonCenter(polygon)
+    if (durationrec) {
+      inside <- lengths(sf::st_intersects(sf::st_geometry(points), aoi)) > 0L
+      average <- mean(Fixation_singleStimulus$Duration[inside], na.rm = TRUE)
+      if (!is.na(average)) duration <- average
     }
 
+    fixations[nrow(fixations) + 1L, ] <- c(
+      center, range(sections) * et, duration
+    )
+    polygons[[length(polygons) + 1L]] <- polygon
+    rownames(fixations)[nrow(fixations)] <- label
   }
 
-  if(unionAOI == FALSE){
-    Fixation_Position = do.call(rbind,lapply(intersectPolygon_list, tmpFun))
-  }else{
-    Fixation_Position = do.call(rbind,lapply(overlapPolygon_list, tmpFun))
-  }
-
-
-  indLogi = clusterDuration >= 0.1  #  fixation should not be short as 0.1 second?
-
-
-  start_end = do.call(rbind,lapply(seq(along = labels), function(i) range(which(clusterings == labels[i])*et)))
-
-  if(length(labels) == 1 | sum(indLogi) == 1){
-    representScanpath = c(Fixation_Position[indLogi,],start_end[indLogi,],clusterDuration[indLogi])
-    representScanpath = data.frame(Fixation_Position_X_px = representScanpath[1],
-                                   Fixation_Position_Y_px = representScanpath[2],
-                                   Event_Start_Trial_Time_ms= representScanpath[3],
-                                   Event_Ende_Trial_Time_ms= representScanpath[4],
-                                   Duration = representScanpath[5])
-  }else{
-    representScanpath = cbind(Fixation_Position[indLogi,],start_end[indLogi,],clusterDuration[indLogi])
-    representScanpath = as.data.frame(representScanpath)
-    names(representScanpath) = c("Fixation_Position_X_px", "Fixation_Position_Y_px","Event_Start_Trial_Time_ms", "Event_Ende_Trial_Time_ms","Duration")
-  }
-
-
-
-  #return(list(representScanpath = representScanpath, AOIpolygons = intersectPolygon_list))
-  #------------------------------------------------------------------------------------
-  #
-  #----------------------------------------------------------------------------------------------HHHHH
-
-  if(durationrec == TRUE){
-    ind = list()
-    if(unionAOI == FALSE){
-      for (i in 1:length(intersectPolygon_list)) {
-        ind[[i]] = point.in.SpatialPolygons(Fixation_singleStimulus$Fixation_Position_X_px,
-                                            Fixation_singleStimulus$Fixation_Position_Y_px,
-                                            intersectPolygon_list[[i]])
-      }
-    }else{
-      for (i in 1:length(overlapPolygon_list)) {
-        ind[[i]] = point.in.SpatialPolygons(Fixation_singleStimulus$Fixation_Position_X_px,
-                                            Fixation_singleStimulus$Fixation_Position_Y_px,
-                                            overlapPolygon_list[[i]])
-      }
-    }
-
-
-
-    fix_duration = c()
-
-    for (i in 1:length(ind)) {
-      fix_duration[i] = mean(Fixation_singleStimulus$Duration[ind[[i]]], na.rm = TRUE)
-    }
-
-
-    fix_duration = fix_duration[indLogi]
-
-    tosub = !is.na(fix_duration)
-    representScanpath$Duration[tosub] = fix_duration[tosub]
-  }
-
-
-
-  if(unionAOI == TRUE){
-    AOIpolygons = overlapPolygon_list[indLogi]
-  }else{
-    AOIpolygons = intersectPolygon_list[indLogi]
-  }
-
-  #AOIpolygons = ifelse(unionAOI, overlapPolygon_list[indLogi], intersectPolygon_list[indLogi])
-  return(list(representScanpath = representScanpath, AOIpolygons = AOIpolygons))
-  #
+  list(representScanpath = fixations, AOIpolygons = polygons)
 }

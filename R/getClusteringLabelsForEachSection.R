@@ -10,7 +10,6 @@
 
 
 #' @export
-#' @import geometry rgeos sp methods
 #' @examples
 #' data(scanpath_MIT1003_i1182314083)
 #' concave_hull = getConcaveHulls(scanpath_MIT1003_i1182314083, 3, 0.04)
@@ -19,76 +18,24 @@
 
 
 getClusteringLabelsForEachSection = function(convex_hull,OR_p, compareFirstAndRest = FALSE){
-  #library(geometry)
-  #library(rgeos)
-  gpcPoly = list()
-  for (i in 1:length(convex_hull)) {
-    if(any(is.na(convex_hull[[i]]))){
-      gpcPoly[[i]] = NA
-    } else{
-      n_ch = length(convex_hull[[i]])
-      if(n_ch == 1){
-        tmp = as.data.frame(convex_hull[[i]])
-        names(tmp) = c("x", "y")
-        gpcPoly[[i]] = as(tmp, "gpc.poly")
-      } else{
-        chtmp = list()
-        for (k in 1:n_ch) {
-          chtmp[[k]] = as.data.frame(convex_hull[[i]][[k]])
-          names(chtmp[[k]]) = c("x", "y")
-          chtmp[[k]] = as(chtmp[[k]], "gpc.poly")
-        }
+  geometries <- lapply(convex_hull, sectionGeometry)
+  n_plg <- length(geometries)
+  clusterings <- integer(n_plg)
+  if (n_plg < 2L) return(clusterings)
 
-        CHtmp = chtmp[[1]]
-        for (h in 2:n_ch) {
-          CHtmp = union(CHtmp, chtmp[[h]])
-        }
-        gpcPoly[[i]] = CHtmp
-
-      }
-    }
-  }
-
-
-  n_plg = length(gpcPoly)
-
-  ## 2.1 similarity of each 2 neighbors
-  similarities = c()
-  NAorNOt = is.na(gpcPoly)
-  for (i in 1:(n_plg-1)) {
-    #if(is.na(gpcPoly[[i]]) | is.na(gpcPoly[[i+1]])){
-    if(NAorNOt[i] | NAorNOt[i+1]){
-      similarities[i] = 0
-    }else{
-      area_union = area.poly(union(gpcPoly[[i]], gpcPoly[[i+1]]))
-      area_intersec = area.poly(intersect(gpcPoly[[i]], gpcPoly[[i+1]]))
-      similarity = area_intersec/area_union
-      similarities[i] = similarity
-    }
-  }
-
-
-
-  #------------------------rewrite--------------------------------------------
-  clusterings = c()
-  firstCluster = min(which(similarities > 0))
-  clusterings[firstCluster] = 1
-  #clusterings[firstCluster+1] = 1
-  if(firstCluster > 1){
-    clusterings[1:(firstCluster-1)] = 0
-  }
-
+  similarities <- vapply(seq_len(n_plg - 1L), function(i) {
+    geometryOverlap(geometries[[i]], geometries[[i + 1L]])
+  }, numeric(1))
+  overlapping <- which(similarities > 0)
+  if (!length(overlapping)) return(clusterings)
+  firstCluster <- overlapping[1L]
+  clusterings[firstCluster] <- 1L
 
   clus = 1
   for (i in (firstCluster):(n_plg-1)) {
-    if(similarities[i]>= OR_p){
-      clusterings[i+1] = clus
-    }else if(similarities[i] == 0 & is.na(gpcPoly[[i+1]])){
-      clusterings[i+1] = 0
-    }else if(similarities[i] < OR_p & !is.na(gpcPoly[[i+1]])){
-      clus = clus + 1
-      clusterings[i+1] = clus
-    }
+    if (is.null(geometries[[i + 1L]])) next
+    if (similarities[i] < OR_p) clus <- clus + 1
+    clusterings[i + 1L] <- clus
   }
   #---------------------------------------------------------------------
 
@@ -109,9 +56,7 @@ getClusteringLabelsForEachSection = function(convex_hull,OR_p, compareFirstAndRe
       similarity2 = c()
       if(length(ind) > 2){
         for (j in 2:length(ind)) {
-          area_union = area.poly(union(gpcPoly[[clusterBegin]], gpcPoly[[ind[j]]]))
-          area_intersec = area.poly(intersect(gpcPoly[[clusterBegin]], gpcPoly[[ind[j]]]))
-          similarity2[j-1] = area_intersec/area_union
+          similarity2[j-1] = geometryOverlap(geometries[[clusterBegin]], geometries[[ind[j]]])
 
         }
       }
@@ -128,9 +73,7 @@ getClusteringLabelsForEachSection = function(convex_hull,OR_p, compareFirstAndRe
         similarity2 = c()
         if(length(ind) > 2){
           for (j in 2:length(ind)) {
-            area_union = area.poly(union(gpcPoly[[newclusterBegin]], gpcPoly[[ind[j]]]))
-            area_intersec = area.poly(intersect(gpcPoly[[newclusterBegin]], gpcPoly[[ind[j]]]))
-            similarity2[j-1] = area_intersec/area_union
+            similarity2[j-1] = geometryOverlap(geometries[[newclusterBegin]], geometries[[ind[j]]])
 
           }
         }

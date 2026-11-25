@@ -11,24 +11,28 @@ sample through a representative scanpath.
 
 ## Installation
 
-<!-- 
-You can install the released version of scanpathAggr from [CRAN](https://CRAN.R-project.org) with:
+Download the Windows ZIP or the R source tarball from the
+[latest GitHub release](https://github.com/HeHuangDortmund/scanpathAggr/releases/latest).
+
+Install the CRAN dependencies if needed:
 
 ``` r
-install.packages("scanpathAggr")
-```
- -->
-
-You can install the package using Github, with the remotes package:
-
-``` r
-remotes::install_github("HeHuangDortmund/scanpathAggr")
+install.packages(
+  c("dbscan", "concaveman", "data.table", "sf", "sp", "ggplot2", "imager"),
+  repos = "https://cloud.r-project.org"
+)
 ```
 
-For windows system, if you get error massage like "...DLL 'xxx' not found: maybe not installed for this architecture", you should add the "--no-multiarch" in order to avoid installing the packages in multiple arch as follows:
- 
+On Windows with R 4.6, install the ZIP from your download folder:
+
 ``` r
-remotes::install_github("HeHuangDortmund/scanpathAggr", INSTALL_opts = c("--no-multiarch"))
+install.packages(file.choose(), repos = NULL, type = "win.binary")
+```
+
+On macOS or Linux, select the `.tar.gz` archive instead:
+
+``` r
+install.packages(file.choose(), repos = NULL, type = "source")
 ```
 
 ## Example

@@ -15,16 +15,18 @@ A data frame with 128 rows and 7 variables
      \item{Event_Ende_Trial_Time_ms}{end time of fixation in seconds}
      \item{Duration}{duration in seconds}
  }
-
- @source {data set MIT1003 from Judd et al. (2009)  <Judd, T., Ehinger, K., Durand, F., & Torralba, A. (2009).
-  Learning to predict where humans look. 2106–2113.> }
- @examples
- data(scanpath_MIT1003_i1182314083)
 }
 \usage{
 scanpath_MIT1003_i1182314083
 }
 \description{
 A group of scanpaths for one of the stimuli in MIT1003 data  from Judd et al. (2009)
+}
+\source{
+Judd, T., Ehinger, K., Durand, F., & Torralba, A. (2009).
+Learning to predict where humans look. 2106-2113.
+}
+\examples{
+data(scanpath_MIT1003_i1182314083)
 }
 \keyword{datasets}
